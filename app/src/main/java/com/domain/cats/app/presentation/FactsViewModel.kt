@@ -25,6 +25,39 @@ class FactsViewModel(
     }
 
     fun fetchFacts() {
-        // TODO: implement fetchFacts method
+        disposable.add(repository.fetchFacts()
+            .subscribeOn(ioScheduler)
+            .observeOn(mainScheduler)
+            .compose(SimpleObservableTransformer(loading, error))
+            .subscribe {
+                catsFacts.value = it
+            }
+        )
+
+//        disposable.add(repository.fetchFacts()
+//            .subscribeOn(ioScheduler)
+//            .observeOn(mainScheduler)
+//            .compose(SimpleObservableTransformer(loading, error))
+//            .subscribe({
+//                catsFacts.value = it
+//            }, {
+//                error.value = it
+//                it.printStackTrace()
+//            })
+//        )
+
+//        disposable.add(repository.fetchFacts()
+//            .subscribeOn(ioScheduler)
+//            .observeOn(mainScheduler)
+//            .doOnSubscribe { loading.value = true }
+//            .doOnError { loading.value = false }
+//            .doOnComplete { loading.value = false }
+//            .subscribe({
+//                catsFacts.value = it
+//            }, {
+//                error.value = it
+//                it.printStackTrace()
+//            })
+//        )
     }
 }

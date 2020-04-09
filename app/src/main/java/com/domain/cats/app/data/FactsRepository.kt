@@ -8,10 +8,12 @@ interface FactsRepository {
     fun fetchFacts(): Observable<List<Cat>>
 
     class Impl private constructor(private val service: FactsService) : FactsRepository {
-
         override fun fetchFacts(): Observable<List<Cat>> {
-            // TODO: implement fetchFacts method
+            return service.fetchFacts().map { factsResponse ->
+                factsResponse.all.map { it.toCat() }
+            }
         }
+        // Implement all methods here
 
         companion object {
             // For Singleton instantiation
