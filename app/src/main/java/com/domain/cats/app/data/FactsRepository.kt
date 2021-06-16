@@ -2,15 +2,18 @@ package com.domain.cats.app.data
 
 import com.domain.cats.app.data.remote.FactsService
 import com.domain.cats.app.domain.models.Cat
-import io.reactivex.Observable
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 interface FactsRepository {
-    fun fetchFacts(): Observable<List<Cat>>
+    fun fetchFacts(): Flow<List<Cat>>
 
     class Impl private constructor(private val service: FactsService) : FactsRepository {
 
-        override fun fetchFacts(): Observable<List<Cat>> {
-            // TODO: implement fetchFacts method
+        override fun fetchFacts(): Flow<List<Cat>> = flow {
+            val factsResponse = service.fetchFacts()
+            val facts = factsResponse.map { it.toCat() }
+            emit(facts)
         }
 
         companion object {

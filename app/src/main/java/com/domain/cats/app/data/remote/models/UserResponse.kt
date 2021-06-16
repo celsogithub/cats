@@ -1,10 +1,10 @@
 package com.domain.cats.app.data.remote.models
 
 import com.domain.cats.app.domain.models.User
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 data class UserResponse(
-    @SerializedName("_id") val id: String,
+    @Json(name = "_id") val id: String,
     val name: UserNameResponse
 ) {
     fun toUser() = User(

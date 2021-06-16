@@ -1,30 +1,42 @@
 package com.domain.cats.app.presentation
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.domain.cats.app.data.FactsRepository
+import androidx.lifecycle.viewModelScope
 import com.domain.cats.app.domain.models.Cat
-import io.reactivex.Scheduler
-import io.reactivex.disposables.CompositeDisposable
+import com.domain.cats.app.domain.usecases.FetchFactsUseCase
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.launch
 
 class FactsViewModel(
-    private val repository: FactsRepository,
-    private val ioScheduler: Scheduler,  // Scheduler for IO
-    private val mainScheduler: Scheduler // Scheduler for UI/Main
+    private val useCase: FetchFactsUseCase
 ) : ViewModel() {
 
-    private val disposable = CompositeDisposable()
+    private val _loading = MutableLiveData<Boolean>()
+    val loading: LiveData<Boolean>
+        get() = _loading
 
-    val loading = MutableLiveData<Boolean>()
-    val error = MutableLiveData<Throwable>()
-    val catsFacts = MutableLiveData<List<Cat>>()
+    private val _error = MutableLiveData<Throwable>()
+    val error: LiveData<Throwable>
+        get() = _error
 
-    override fun onCleared() {
-        disposable.clear()
-        super.onCleared()
-    }
+    private val _catsFacts = MutableLiveData<List<Cat>>()
+    val catsFacts: LiveData<List<Cat>>
+        get() = _catsFacts
 
     fun fetchFacts() {
-        // TODO: implement fetchFacts method
+        viewModelScope.launch {
+            _loading.value = true
+
+            useCase.execute()
+                .catch { _error.value = it }
+                .onCompletion { _loading.value = false }
+                .collect { facts ->
+                    _catsFacts.value = facts
+                }
+        }
     }
 }

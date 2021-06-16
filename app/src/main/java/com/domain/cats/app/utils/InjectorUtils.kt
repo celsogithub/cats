@@ -3,17 +3,18 @@ package com.domain.cats.app.utils
 import com.domain.cats.app.BuildConfig
 import com.domain.cats.app.data.FactsRepository
 import com.domain.cats.app.data.remote.FactsService
+import com.domain.cats.app.domain.usecases.FetchFactsUseCase
 import com.domain.cats.app.presentation.FactsViewModelFactory
-import io.reactivex.Scheduler
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.logging.HttpLoggingInterceptor.Level
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 object InjectorUtils {
@@ -36,17 +37,21 @@ object InjectorUtils {
             .build()
 
     @JvmStatic
+    private fun provideMoshi(): Moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
+    @JvmStatic
     fun provideFactsService(
         httpClient: OkHttpClient,
+        moshi: Moshi,
         apiURL: String = BuildConfig.BASE_URL
     ): FactsService {
-        val converterFactory = GsonConverterFactory.create()
-        val rxAdapter = RxJava2CallAdapterFactory.create()
+        val converterFactory = MoshiConverterFactory.create(moshi)
         val retrofit = Retrofit.Builder()
             .baseUrl(apiURL)
             .client(httpClient)
             .addConverterFactory(converterFactory)
-            .addCallAdapterFactory(rxAdapter)
             .build()
 
         return retrofit.create(FactsService::class.java)
@@ -58,15 +63,23 @@ object InjectorUtils {
     }
 
     @JvmStatic
+    private fun provideFetchFactsUseCase(
+        repository: FactsRepository,
+        ioDispatcher: CoroutineDispatcher
+    ): FetchFactsUseCase {
+        return FetchFactsUseCase.Impl(repository, ioDispatcher)
+    }
+
+    @JvmStatic
     fun provideFactsViewModelFactory(
         debuggable: Boolean = BuildConfig.DEBUG,
-        ioScheduler: Scheduler = Schedulers.io(),
-        mainScheduler: Scheduler = AndroidSchedulers.mainThread()
     ): FactsViewModelFactory {
         val logger = providesLoggerInterceptor(debuggable)
         val okHttpClient = provideHttpClient(logger)
-        val service = provideFactsService(okHttpClient)
+        val moshi = provideMoshi()
+        val service = provideFactsService(okHttpClient, moshi)
         val repository = provideFactsRepository(service)
-        return FactsViewModelFactory(repository, ioScheduler, mainScheduler)
+        val useCase = provideFetchFactsUseCase(repository, Dispatchers.IO)
+        return FactsViewModelFactory(useCase)
     }
 }

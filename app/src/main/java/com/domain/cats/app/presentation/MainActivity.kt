@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.domain.cats.app.R
 import com.domain.cats.app.databinding.ActivityMainBinding
@@ -37,8 +37,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupViewModel() {
-        viewModel = ViewModelProviders.of(this, viewModelFactory)
-            .get(FactsViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(FactsViewModel::class.java)
     }
 
     private fun setupAdapter() {
