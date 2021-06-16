@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'dagger.hilt.android.plugin'
 
 android {
     compileSdkVersion 30
@@ -69,6 +70,10 @@ dependencies {
 
     // Moshi
     implementation "com.squareup.moshi:moshi-kotlin:$rootProject.ext.moshi"
+
+    // Dagger Hilt
+    implementation "com.google.dagger:hilt-android:$rootProject.ext.dagger"
+    kapt "com.google.dagger:hilt-android-compiler:$rootProject.ext.dagger"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

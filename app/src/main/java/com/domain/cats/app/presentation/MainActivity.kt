@@ -3,25 +3,23 @@ package com.domain.cats.app.presentation
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.domain.cats.app.R
 import com.domain.cats.app.databinding.ActivityMainBinding
 import com.domain.cats.app.presentation.adapter.FactsAdapter
-import com.domain.cats.app.utils.InjectorUtils
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var dataBinding: ActivityMainBinding
-    private lateinit var viewModel: FactsViewModel
+    private val viewModel by viewModels<FactsViewModel>()
     private val adapter by lazy {
         FactsAdapter()
-    }
-    private val viewModelFactory: FactsViewModelFactory by lazy {
-        InjectorUtils.provideFactsViewModelFactory()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,15 +27,10 @@ class MainActivity : AppCompatActivity() {
         dataBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         dataBinding.lifecycleOwner = this
 
-        setupViewModel()
         setupAdapter()
         setupObservers()
 
         viewModel.fetchFacts()
-    }
-
-    private fun setupViewModel() {
-        viewModel = ViewModelProvider(this, viewModelFactory).get(FactsViewModel::class.java)
     }
 
     private fun setupAdapter() {
