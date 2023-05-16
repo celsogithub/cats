@@ -10,7 +10,7 @@ interface FactsRepository {
     class Impl private constructor(private val service: FactsService) : FactsRepository {
 
         override fun fetchFacts(): Observable<List<Cat>> {
-            // TODO: implement fetchFacts method
+            // TODO: implement fetchFacts method calling service function
         }
 
         companion object {
