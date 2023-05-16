@@ -11,13 +11,13 @@ interface FetchFactsUseCase {
 
     class Impl(
         private val repository: FactsRepository,
-        private val ioDispatcher: CoroutineDispatcher
+        private val dispatcher: CoroutineDispatcher
     ) : FetchFactsUseCase {
 
         override fun execute(): Flow<List<Cat>> {
             return repository
                 .fetchFacts()
-                .flowOn(ioDispatcher)
+                .flowOn(dispatcher)
         }
     }
 }
